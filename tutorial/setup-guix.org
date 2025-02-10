@@ -1,0 +1,232 @@
+#+TITLE: Getting started
+#+SUBTITLE: =guix=
+#+AUTHOR: Emmanuel Agullo and Mathieu Faverge
+#+SETUPFILE: ../include/compose-publish/theme-readtheorginria.setup
+#+PROPERTY: header-args:bash :eval no :exports both
+
+* =guix=
+
+ Un des objectifs du TP est d'apprendre à maîtriser votre environnement
+ logiciel, en particulier dans un contexte de calcul haute performance. Vous
+ avez déjà vu les =modules=, et il est possible de faire le TP avec ceux-ci.
+ Nous vous proposons toutefois de manipuler [[https://guix.gnu.org/][guix]] ici. Grâce à un effort conjoint
+ des équipes =guix= et =plafrim=, =guix= est immédiatement disponible sur votre
+ super-calculateur préféré (et vous pouvez également [[https://guix.gnu.org/manual/en/html_node/Binary-Installation.html][l'installer]] sur votre
+ machine =linux= si vous les souhaitez). Il permet un contrôle fin de
+ l'environnement, reproductible dans le temps et sur différentes machines.
+
+* In a nutshell
+
+** Set up =guix= as proposed
+:PROPERTIES:
+:ID:       09bcbde5-8641-4d4d-8b37-9d25df66e9e7
+:END:
+
+In a nutshell, after having clone the project (~git clone --recurse-submodules
+https://gitlab.inria.fr/solverstack/mini-examples/mini-chameleon.git~ or
+~git clone --recurse-submodules git@gitlab.inria.fr:solverstack/mini-examples/mini-chameleon.git~),
+one may proceed as follows to obtain the proposed =guix= setup :
+
+#+begin_src bash
+  mkdir -p ~/.config/guix # prepare the repository in case it does not already exist
+  ln -s $(pwd)/mini-chameleon/channels.scm ~/.config/guix/ # position the proposed channels ; alternative: cp ./mini-chameleon/channels.scm ~/.config/guix/channels.scm
+  guix build hello # avoid issue with permissions
+  guix pull --allow-downgrades # set up guix with
+  hash guix # make sur the new guix is taken into account by bash
+  guix describe --format=channels # check you have the expected channels
+#+end_src
+
+These steps are [[id:18996a23-7175-40b6-abd8-8caa5af7b0a7][explained in details below]].
+
+** Work in an environment for developing =mini-chameleon=
+:PROPERTIES:
+:ID:       e6a9011f-3bba-4ce5-a0d5-df3f91da0b50
+:END:
+
+Once =guix= is properly setup, one may work in an isolated environment, with
+expected dependencies, to develop and assess guix. For instance:
+
+#+begin_src bash
+guix shell --pure -D mini-chameleon --with-input=openblas=mkl bash gcc-toolchain emacs nano vim --tune -- bash --norc
+#+end_src
+
+[[id:6b325e00-865c-4462-959a-024f345991a3][More options to work in an environment for developing =mini-chameleon= are proposed below.]]
+
+* Set up =guix=: detailed explanations
+:PROPERTIES:
+:ID:       18996a23-7175-40b6-abd8-8caa5af7b0a7
+:END:
+
+** channels
+
+  On utilise ~guix pull~ (pas la peine de faire ~guix pull~ tout de suite, on le
+  fera plus loin) pour mettre à jour la distribution (voir [[https://guix.gnu.org/manual/en/html_node/Invoking-guix-pull.html#Invoking-guix-pull][Invoking guix pull]]) .
+  Par défaut, ~guix pull~ télécharge et déploie =guix= lui-même depuis le dépôt
+  officiel =gnu guix=. Sur =plafrim=, de surcroît, l'extension [[https://hpc.guix.info/][guix-hpc]] est
+  activée par défaut. Nous vous proposons pour ce TP en sus:
+  - d'activer [[https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free][guix-hpc-non-free]] avant de pouvoir utiliser p. ex. =intel mkl= et
+    =cuda=;
+  - de fixer les canaux pour assurer la reproducibilité de l'environnement.
+  Pour ce faire, il vous faut modifier vos [[https://guix.gnu.org/manual/en/html_node/Channels.html][channels]] dans le fichier
+  =~/.config/guix/channels.scm=. Un =channel= spéficie une =url= et une =branche=
+  d'un dépôt =git= à déployer. Nous vous invitons à prendre les canaux proposés
+  dans ~./mini-chameleon/channels.scm~:
+
+  #+begin_src bash
+    cp ./mini-chameleon/channels.scm ~/.config/guix/channels.scm
+  #+end_src
+
+  # À noter que les canaux ont été *mis à jour le 9 octobre 2021* [[https://issues.guix.gnu.org/51088][pour le support
+  # de =clang++= sur =plafrim=]] (un grand merci à Ludovic Courtès!), le *28 octobre
+  # 2021* pour le support de [[https://guix.gnu.org/en/blog/2021/from-guix-environment-to-guix-shell/][guix shell]] et [[https://gitlab.inria.fr/solverstack/hello-mpi/][hello-mpi]], le *8 novembre 2021* pour le
+  # support explicite de [[https://gitlab.inria.fr/solverstack/mini-examples/mini-chameleon][mini-chameleon]] (cf [[https://gitlab.inria.fr/guix-hpc/guix-hpc/-/commit/7677837d832d59f404cefd732de63a8f710ffec4][mini-chameleon]]), et le *16 novembre
+  # 2021* pour le [[https://git.savannah.gnu.org/cgit/guix.git/commit/?id=2a32c99b387cec52d586007172f419630d79bc6b][support de =libomp=
+  # automatique avec =clang=]].
+
+** =guix pull=
+
+  Une fois que vous avez positionné votre ~~/.config/guix/channels.scm~ de la
+  sorte vous pouvez [[https://guix.gnu.org/manual/en/html_node/Invoking-guix-pull.html#Invoking-guix-pull][invoquer guix pull]]:
+
+  #+begin_src bash
+    guix pull --allow-downgrades
+  #+end_src
+
+  À noter que si vous avez une version plus récente de =guix=, vous devrez
+  utiliser ~guix pull --allow-downgrades~ pour autoriser =guix= à revenir en
+  arrière.
+
+  Notez que =bash= utilise une table de hachage pour se souvenir des chemins des
+  exécutables, il est conseillé de la mettre à jour explicitement pour garantir
+  que le nouveau chemin vers =guix= soit trouvé après votre ~pull~ (~man bash~
+  pour plus d'informations):
+  #+begin_src bash
+  hash guix
+  #+end_src
+
+** Check step
+
+You can check you are using the expected channels with:
+  #+begin_src bash
+  guix describe --format=channels
+  #+end_src
+
+** Rolling-release (not recommended)
+
+Note that, instead of a fixed version of the channels, it is possible to obtain
+the their latest version:
+    #+begin_src scheme :tangle channels-rolling.scm
+  (list (channel
+         (name 'guix-hpc-non-free)
+         (url "https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free.git"))
+        (channel
+         (name 'guix-hpc)
+         (url "https://gitlab.inria.fr/guix-hpc/guix-hpc.git"))
+        (channel
+         (name 'guix)
+         (url "https://git.savannah.gnu.org/git/guix.git")))
+  #+end_src
+
+In the context of the proposed work, we however do not recommend to proceed like
+this but instead to use the above fixed channels, to ensure we rely on a common
+environment.
+
+* Work in an environment for developing =mini-chameleon=: detailed explanations
+:PROPERTIES:
+:ID:       6b325e00-865c-4462-959a-024f345991a3
+:END:
+
+** De manière implicite (le plus simple)
+
+  =guix= permet de [[https://guix.gnu.org/manual/fr/html_node/Invoquer-guix-environment.html][définir un environnement]] de manière implicite ou explicite Le
+  plus simple pour ce TP est sans doute de le faire de manière implicite (~-D
+  chameleon~), p. ex. via:
+
+  #+begin_src bash :results output :exports both
+    guix shell --pure -D mini-chameleon --with-input=openblas=mkl bash emacs nano vim -- bash --norc
+  #+end_src
+
+** De manière explicite (pour info)
+
+     Notez que vous pouvez alternativement charger un environnement de manière
+     explicite:
+  #+begin_src bash :results output :exports both
+    guix shell --pure bash cmake coreutils gdb gcc-toolchain grep make mkl openmpi openssh sed valgrind emacs nano vim -- bash --norc
+  #+end_src
+  
+** Avec un compilateur récent (utile pour la vectorisation p. ex.)
+
+     Par défaut =guix= fait un choix relativement conservateur sur la version de =gcc=
+     afin de garantir le support d'un maximum de paquets. Il est possible de
+     choisir un compilateur plus récent (=gcc 13.2=) en chargeant explicitement
+     ~gcc-toolchain~:
+
+  #+begin_src bash :results output :exports both
+    guix shell --pure -D mini-chameleon --with-input=openblas=mkl bash gcc-toolchain emacs nano vim -- bash --norc
+  #+end_src
+
+     On peut choisir un compilateur alternatif, p. ex. =clang= (plus
+     besoin de charger explicitement ~libomb~ en plus de ~clang-toolchain~
+     depuis la mise à jour du 16 novembre 2021):
+
+  #+begin_src bash :results output :exports both
+    guix shell --pure -D mini-chameleon --with-input=openblas=mkl bash clang-toolchain emacs nano vim -- bash --norc
+  #+end_src
+
+     Notez que les paquets installés restent compilés avec la version
+     conservatie de =gcc= et qu'il faut être vigilant quant à la
+     compatibilité d'ABI (cf. avertissement dans les [[https://guix.gnu.org/manual/fr/html_node/Options-de-transformation-de-paquets.html][options de
+     transformation de paquets]]).
+
+** Modifier votre construction pour la vectorisation
+
+*** Spécifier explicitement l'architecture (ex: ~-march=haswell~)
+
+     En l'état, la construction de vos binaires n'est pas optimisée pour une
+     architecture particulière. Il vous faudra modifier votre système de
+     construction pour ce faire. Vous pouvez vérifier le type d'architecture sur
+     lequel vous voulez tourner (depuis le noeud cible):
+
+     #+begin_src bash
+     guix shell cpuid  -- cpuid | grep "(synth)" | uniq
+     #+end_src
+
+     Vous pouvez ensuite fixer l'architecture ainsi ciblée en modifiant votre
+     construction, via quelque chose comme ~set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}
+     -march=haswell")~.
+
+*** Laisser le compilateur détecter l'architecture (~-march=native~)
+
+Il est aussi possible d'utiliser ~-march=native~ pour laisser le compilateur
+détecter l'architecture cible plutôt que de la spécifier directement. Dans notre
+cas, on peut par exemple le spécifier via ~set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}
+-march=native")~.
+
+Si vous vous mettez dans un environnement (~guix shell --pure -D mini-chameleon
+...~) dans lequel vous compilez ensuite vous-même =mini-chameleon= (~cmake .. ;
+make -j~), cela fonctionnera comme attendu.
+
+Toutefois, si vous déléguez à =guix= la compilation du paquet lui même (~guix
+shell --pure mini-chameleon ...~), alors vous n'obtiendrez pas un binaire
+optimisé. En effet =guix= a vocation à [[https://hpc.guix.info/blog/2018/01/pre-built-binaries-vs-performance/][produire des binaires portables]]: l'idée
+est de générer un code optimisé pour toutes les variantes d'architectures et de
+sélectionner la bonne variante à l'exécution. La mise en place d'un tel schéma
+est au-delà des objectifs du projet. Un schéma moins ambitieux consiste à
+spécifier à =guix= explicitement qu'on veut [[https://hpc.guix.info/blog/2022/01/tuning-packages-for-a-cpu-micro-architecture/][produire une binaire pour une
+architecture cible]]. Pour ce faire, il faut alors passer l'option ~--tune~ à
+=guix=, p. ex.:
+
+#+begin_src bash
+guix shell --pure mini-chameleon --tune
+#+end_src
+
+À noter qu'on peut produire un binaire pour une architecture spécifiée. Il
+suffit comme ici de mettre ~-march=native~ dans le source (~set(CMAKE_C_FLAGS
+"${CMAKE_C_FLAGS} -march=native")~) et de spécifier l'architecture via l'option
+~--tune~ de =guix=:
+
+#+begin_src bash
+guix shell --pure mini-chameleon --tune=haswell
+#+end_src
+
+

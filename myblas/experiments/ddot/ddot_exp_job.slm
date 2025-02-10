@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --exclusive
+#SBATCH -C miriel
+
+cache=$1
+../ddot_exp.sh $cache

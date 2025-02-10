@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --exclusive
+#SBATCH -C miriel
+
+
+# Get input parameter
+N=$1
+wd=$2
+
+guix shell --pure -D mini-chameleon --with-input=openblas=mkl bash gcc-toolchain emacs nano vim --tune -- bash --norc
+
+# cd in the project folder
+cd $wd
+
+./perf_ddot -v seq -N $N

@@ -1,0 +1,101 @@
+#+TITLE: Getting started
+#+SUBTITLE: IS331 CISD @ ENSEIRB-MATMECA
+#+AUTHOR: Emmanuel Agullo and Mathieu Faverge
+#+SETUPFILE: ../include/compose-publish/theme-readtheorginria.setup
+#+PROPERTY: heder-args:bash :eval no :exports both
+
+* Objectives
+
+Dans le contexte de l'option IS331, voici [[https://cours-mf.gitlabpages.inria.fr/is331/][les instructions spécifiques]].
+
+# The main objectives of this project is to develop by yourself a small linear
+# algebra library (that includes a GEMM, and a GETRF without pivoting) with the
+# highest possible performance for:
+# - the sequential kernels;
+# - the multi-threaded kernels;
+# - the MPI only implementation;
+# - and, as a bonus, the MPI+thread implementation.
+
+# All developments will need to be carefully studied and explained in your report
+# for each of these versions. Comparative studies of the results using R figures
+# will be asked to show the good performances, and the improvement brought by each
+# proposed functionality.
+
+# As a complement to the report, a presentation of the results will be made. This
+# presentation will be taken into account for the evaluation of the English class.
+
+* Specific instructions for =enseirb-matmeca= =cisd=:
+
+** Collaborative notes and possible hotfixes for the whole promo
+
+   [[https://link.infini.fr/cisd-2022]]
+
+** Collaborative set up on the =enseirb= =gitlab= instance
+
+*** Première séance (6/10/2023)
+
+**** Constitution des équipes
+
+Constituez vos équipes par groupes de 4 personnes (un des groupes sera constitué
+de 3 personnes). Envoyez vos groupes à Mathieu Faverge (gardez en copie tous les
+membres du groupe).
+
+**** Explorez le projet
+
+Rendez-vous [[./setup.org][sur la page de setup]] pour explorer le projet.
+
+*** Séances suivantes (à partir du 13/10/2023)
+
+Vous travaillez de manière collaborative via le ~gitlab~ de l'~enseirb~ sur le dépôt
+qui vous est fourni (suite à votre envoi de la première séance):
+#+begin_src bash :eval no
+TEAMID=X
+git clone --recursive git@gitlab.enseirb-matmeca.dev:cisd/is331/team${TEAMID}.git
+cd team${TEAMID}
+#+end_src
+
+où X doit être remplacé par le numéro de votre équipe.
+
+Si vous travaillez avec le [[./setup-guix.org][setup guix]], assurez-vous que vos canaux
+=guix= (~/.config/guix/channels.scm~) pointent bien sur ceux
+nouvellement clonés et mettez à jour =guix=:
+
+#+begin_src bash
+  # mkdir -p ~/.config/guix # not requirea priori: should have been done last time; uncomment otherwise
+  mv ~/.config/guix/channels.scm ~/.config/guix/channels-old.scm~ # backup previous channels
+  ln -s $(pwd)/channels.scm ~/.config/guix/ # position the proposed channels ; alternative: cp ./channels.scm ~/.config/guix/channels.scm
+  # guix build hello # not requirea priori: should have been done last time: uncomment otherwise
+  guix pull --allow-downgrades # set up guix with
+  hash guix # make sur the new guix is taken into account by bash
+  guix describe --format=channels # check you have the expected channels
+#+end_src
+
+Pour récupérer le code de travail de base et pouvoir intégrer facilement les
+mises à jour, il va falloir l'ajouter en tant que nouvelle remote:
+
+#+begin_src bash :eval no
+git remote add subject git@gitlab.inria.fr:solverstack/mini-examples/mini-chameleon.git
+git fetch subject
+git submodule update --init
+#+end_src
+
+Ainsi, le master du dépôt du sujet devrait être identique à celui de votre dépôt
+de projet de départ.
+
+#+begin_example
+597aaf7 (HEAD -> master, teamX/master, subject/master) Channels with new mini-chameleon readily available
+#+end_example
+
+À ce stade, tout est configuré pour que vous puissiez travailler sur le projet.
+En cas de mise à jour du sujet, il faudra synchroniser à nouveau votre master
+avec celui du dépôt. En cas de soucis pour faire cette démarche,
+n'hésitez pas à nous demander. Mais surtout:
+
+_ Assurez-vous que le dépôt ne contient aucunes modifications locales avant de faire
+la manipulation et que vous êtes bien positionné sur le dernier =master= de
+votre dépôt. _
+
+* Non specific instructions
+
+The rest of the instructions are non specific to =cisd= and can be retrieved [[../README.org][on
+the main page of the project]].

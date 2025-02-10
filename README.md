@@ -1,4 +1,18 @@
 # Custom BLAS
+## Introduction
+Project made at the university to build a custom basic linear algebra library.
+
+**Kernels available**:
+- Sequential
+- Distributed around cores through OpenMP
+- Distributed around cpus through MPI
+- Accelerated through a GPU
+
+**Operations implemented**:
+- DDOT
+- DGEMM: Matrix operation C  :=alpha*op( A )*op( B ) + beta*C
+- DGETRF: Computes an LU factorization of a general M-by-N matrix A with A = P * L * U
+
 
 
 ## Setup
